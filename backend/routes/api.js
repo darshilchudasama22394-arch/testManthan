@@ -6,7 +6,7 @@ const fs = require('fs');
 const exceljs = require('exceljs');
 const archiver = require('archiver');
 const Student = require('../models/student');
-const School = require('../models/School'); // Ensure you import the School model
+const School = require('../models/School');
 
 const router = express.Router();
 
@@ -31,11 +31,26 @@ router.get('/schools', async (req, res) => {
   }
 });
 
-// 2. Handle new student registration
+// 2. Handle new student registration (UPDATED)
 router.post('/students', upload.single('studentPhoto'), async (req, res) => {
   try {
-    const { studentName, fatherName, motherName, class: studentClass, srNo, uniqueId, contactNo, address, schoolName } = req.body;
-    
+    const {
+      studentName,
+      fatherName,
+      motherName,
+      class: studentClass,
+      srNo,
+      uniqueId,
+      contactNo,
+      address,
+      bloodGroup, // ✅ New optional field
+      schoolName
+    } = req.body;
+
+    if (!studentName || !fatherName || !motherName || !studentClass || !srNo || !schoolName) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
     if (!req.file) {
       return res.status(400).send('Photo is required.');
     }
@@ -49,6 +64,7 @@ router.post('/students', upload.single('studentPhoto'), async (req, res) => {
       uniqueId,
       contactNo,
       address,
+      bloodGroup, // ✅ Save new field
       schoolName,
       photoFilename: req.file.filename,
     });
@@ -60,7 +76,7 @@ router.post('/students', upload.single('studentPhoto'), async (req, res) => {
   }
 });
 
-// 3. Download Excel file for a school
+// 3. Download Excel file for a school (UPDATED with blood group)
 router.get('/admin/download/excel/:schoolName', async (req, res) => {
   try {
     const students = await Student.find({ schoolName: req.params.schoolName });
@@ -75,6 +91,7 @@ router.get('/admin/download/excel/:schoolName', async (req, res) => {
       { header: 'Unique ID', key: 'uniqueId', width: 20 },
       { header: 'Contact Number', key: 'contactNo', width: 15 },
       { header: 'Address', key: 'address', width: 50 },
+      { header: 'Blood Group', key: 'bloodGroup', width: 15 }, // ✅ Added field
       { header: 'Photo Filename', key: 'photoFilename', width: 40 },
     ];
     worksheet.addRows(students);
@@ -94,8 +111,7 @@ router.get('/admin/download/excel/:schoolName', async (req, res) => {
   }
 });
 
-
-// 4. Download ZIP of photos for a school (photos only, no text files)
+// 4. Download ZIP of photos for a school
 router.get('/admin/download/photos/:schoolName', async (req, res) => {
   try {
     const students = await Student.find({ schoolName: req.params.schoolName });
@@ -114,7 +130,6 @@ router.get('/admin/download/photos/:schoolName', async (req, res) => {
       if (fs.existsSync(filePath)) {
         archive.file(filePath, { name: student.photoFilename });
       }
-      // Removed text file with student details here
     });
 
     await archive.finalize();
@@ -123,7 +138,7 @@ router.get('/admin/download/photos/:schoolName', async (req, res) => {
   }
 });
 
-// Add a new school
+// 5. Add a new school
 router.post('/schools', async (req, res) => {
   try {
     const { schoolName } = req.body;
@@ -146,4 +161,3 @@ router.post('/schools', async (req, res) => {
 });
 
 module.exports = router;
-

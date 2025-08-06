@@ -6,6 +6,7 @@ function RegistrationPage({ schools }) {
   const [selectedSchool, setSelectedSchool] = useState(() => {
     return localStorage.getItem('selectedSchool') || '';
   });
+
   const [formData, setFormData] = useState({
     studentName: '',
     fatherName: '',
@@ -14,8 +15,10 @@ function RegistrationPage({ schools }) {
     srNo: '',
     uniqueId: '',
     contactNo: '',
-    address: ''
+    address: '',
+    bloodGroup: '', // New field
   });
+
   const [photo, setPhoto] = useState(null);
   const [message, setMessage] = useState('');
 
@@ -29,9 +32,10 @@ function RegistrationPage({ schools }) {
     { name: 'motherName', label: "Mother's Name", type: "text", placeholder: "Enter mother's name", required: true },
     { name: 'class', label: "Class", type: "text", placeholder: "Enter class", required: true },
     { name: 'srNo', label: "Serial Number", type: "text", placeholder: "Enter serial number", required: true },
-    { name: 'uniqueId', label: "Unique ID", type: "text", placeholder: "Enter unique ID", required: true },
-    { name: 'contactNo', label: "Contact Number", type: "text", placeholder: "Enter contact number", required: true },
-    { name: 'address', label: "Address", type: "text", placeholder: "Enter address", required: true },
+    { name: 'uniqueId', label: "Unique ID", type: "text", placeholder: "Enter unique ID", required: false },
+    { name: 'contactNo', label: "Contact Number", type: "text", placeholder: "Enter contact number", required: false },
+    { name: 'address', label: "Address", type: "text", placeholder: "Enter address", required: false },
+    { name: 'bloodGroup', label: "Blood Group", type: "text", placeholder: "Enter blood group", required: false },
   ];
 
   const handleInputChange = (e) => {
@@ -41,13 +45,29 @@ function RegistrationPage({ schools }) {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: 'environment' } }, // Open back camera
+        audio: false
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-    } catch {
-      setMessage('Camera access denied. Please allow camera permissions.');
+    } catch (error) {
+      // Fallback to front camera
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+        streamRef.current = fallbackStream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+        }
+        setMessage('Using front camera as fallback.');
+      } catch {
+        setMessage('Camera access denied. Please allow permissions.');
+      }
     }
   };
 
@@ -83,9 +103,10 @@ function RegistrationPage({ schools }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedSchool || !formData.studentName || !photo) {
-      setMessage('Please fill all fields and capture a photo.');
+      setMessage('Please fill all required fields and capture a photo.');
       return;
     }
+
     const submissionData = new FormData();
     submissionData.append('schoolName', selectedSchool);
     Object.keys(formData).forEach(key => {
@@ -110,11 +131,11 @@ function RegistrationPage({ schools }) {
           srNo: '',
           uniqueId: '',
           contactNo: '',
-          address: ''
+          address: '',
+          bloodGroup: ''
         });
         setPhoto(null);
         stopCamera();
-        // Keep the selected school to persist selection
       } else {
         const errorData = await response.json();
         setMessage(errorData.message || 'Registration failed. Please try again.');
@@ -128,7 +149,6 @@ function RegistrationPage({ schools }) {
     localStorage.setItem('selectedSchool', selectedSchool);
   }, [selectedSchool]);
 
-  // Restart camera when selectedSchool is set and no photo is captured
   useEffect(() => {
     if (selectedSchool && !photo) {
       startCamera();
@@ -147,7 +167,6 @@ function RegistrationPage({ schools }) {
             setSelectedSchool(e.target.value);
             setPhoto(null);
             setMessage('');
-            // startCamera() and stopCamera() handled by useEffect now
           }}
         >
           <option value="">-- Choose a School --</option>
