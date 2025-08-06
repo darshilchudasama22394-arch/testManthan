@@ -6,12 +6,12 @@ const studentSchema = new mongoose.Schema({
   motherName: { type: String, required: true },
   class: { type: String, required: true },
   srNo: { type: String, required: true },
-  uniqueId: { type: String, required: false }, // ✅ now optional
-  contactNo: { type: String, required: false }, // ✅ now optional
-  address: { type: String, required: false },   // ✅ now optional
-  bloodGroup: { type: String, required: false }, // ✅ new optional field
+  uniqueId: { type: String, required: false },
+  contactNo: { type: String, required: false },
+  address: { type: String, required: false },
+  bloodGroup: { type: String, required: false },
   schoolName: { type: String, required: true },
-  studentPhoto: { type: String, required: true }
+  photoFilename: { type: String, required: true } // ✅ fixed to match API
 });
 
 module.exports = mongoose.model('Student', studentSchema);
