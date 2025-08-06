@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-
+const API_URL = process.env.REACT_APP_API_URL;
 function AdminDashboard({ schools, addSchool }) {
   const [selectedSchool, setSelectedSchool] = useState('');
   const [showAddSchool, setShowAddSchool] = useState(false);
   const [newSchoolName, setNewSchoolName] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleDownloadExcel = () => {
-    if (selectedSchool) {
-      window.open(`http://localhost:5000/api/admin/download/excel/${selectedSchool}`, '_blank');
-    }
-  };
+ const handleDownloadExcel = () => {
+  if (selectedSchool) {
+    window.open(`https://testmanthan-4.onrender.com/api/admin/download/excel/${selectedSchool}`, '_blank');
+  }
+};
 
-  const handleDownloadPhotos = () => {
-    if (selectedSchool) {
-      window.open(`http://localhost:5000/api/admin/download/photos/${selectedSchool}`, '_blank');
-    }
-  };
-
+const handleDownloadPhotos = () => {
+  if (selectedSchool) {
+    window.open(`https://testmanthan-4.onrender.com/api/admin/download/photos/${selectedSchool}`, '_blank');
+  }
+};
   const toggleAddSchool = () => {
     setShowAddSchool(prev => !prev);
     setNewSchoolName('');
@@ -36,13 +35,12 @@ function AdminDashboard({ schools, addSchool }) {
       return;
     }
 
-    try {
-      const response = await fetch('http://localhost:5000/api/schools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolName: trimmedName }),
-      });
-
+   try {
+  const response = await fetch(`https://testmanthan-4.onrender.com/api/schools`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ schoolName: trimmedName }),
+  });
       if (!response.ok) {
         const data = await response.json();
         setMessage(data.message || 'Failed to add school.');

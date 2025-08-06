@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://testmanthan-4.onrender.com';
 
 function RegistrationPage({ schools }) {
   const [selectedSchool, setSelectedSchool] = useState(() => {

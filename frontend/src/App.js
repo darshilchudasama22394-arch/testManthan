@@ -11,7 +11,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/schools')
+    fetch(`https://testmanthan-4.onrender.com/api/schools`)
       .then(res => res.json())
       .then(data => setSchools(data))
       .catch(() => setSchools([]));
